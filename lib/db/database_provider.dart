@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../providers/expityItem.dart';
+import '../providers/expiryItem.dart';
 
 class DatabaseProvider {
   static const DATABASE_FILE = "expiry.db";
@@ -34,7 +34,7 @@ class DatabaseProvider {
     });
   }
 
-  Future<List<ExpiryItem>> getCredentials() async {
+  Future<List<ExpiryItem>> getItems() async {
     final db = await database;
 
     var items = await db.query(TABLE_EXPIRY,
@@ -46,19 +46,19 @@ class DatabaseProvider {
     return itemsList;
   }
 
-  Future<ExpiryItem> insertCredential(ExpiryItem itm) async {
+  Future<ExpiryItem> insert(ExpiryItem itm) async {
     final db = await database;
     await db.insert(TABLE_EXPIRY, itm.toMap());
     return itm;
   }
 
-  Future<int> updateCredential(String id, ExpiryItem itm) async {
+  Future<int> update(String id, ExpiryItem itm) async {
     final db = await database;
     return await db.update(TABLE_EXPIRY, itm.toMap(),
         where: "$COLUMN_ID = ?", whereArgs: [id]);
   }
 
-  Future<int> deleteCredential(String id) async {
+  Future<int> delete(String id) async {
     final db = await database;
     return await db
         .delete(TABLE_EXPIRY, where: "$COLUMN_ID = ?", whereArgs: [id]);
