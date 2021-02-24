@@ -4,15 +4,15 @@ import '../db/database_provider.dart';
 class ExpiryItem with ChangeNotifier {
   String id;
   String name;
-  DateTime expityDate;
+  DateTime expiryDate;
 
   ExpiryItem(
-      {@required this.id, @required this.name, @required this.expityDate});
+      {@required this.id, @required this.name, @required this.expiryDate});
 
   ExpiryItem.fromJson(Map<String, dynamic> jsonData) {
     this.id = jsonData[DatabaseProvider.COLUMN_ID];
     this.name = jsonData[DatabaseProvider.COLUMN_NAME];
-    this.expityDate =
+    this.expiryDate =
         DateTime.parse(jsonData[DatabaseProvider.COLUMN_EXPIRY_DATE]);
   }
 
@@ -20,7 +20,7 @@ class ExpiryItem with ChangeNotifier {
     return {
       DatabaseProvider.COLUMN_ID: this.id,
       DatabaseProvider.COLUMN_NAME: this.name,
-      DatabaseProvider.COLUMN_EXPIRY_DATE: this.expityDate.toString()
+      DatabaseProvider.COLUMN_EXPIRY_DATE: this.expiryDate.toString()
     };
   }
 }

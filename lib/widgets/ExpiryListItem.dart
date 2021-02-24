@@ -49,7 +49,7 @@ class ExpiryListItem extends StatelessWidget {
         elevation: 5,
         child: ListTile(
             title: Text(item.name),
-            subtitle: Text(item.expityDate.toString()),
+            subtitle: Text(item.expiryDate.toString()),
             trailing: IconButton(
               icon: Icon(Icons.edit),
               onPressed: () {},
