@@ -10,6 +10,7 @@ import '../providers/expiryItems.dart';
 import '../providers/expiryItem.dart';
 
 class ExpiryItemForm extends StatefulWidget {
+  static const ROUTE_NAME = "add-item";
   @override
   _ExpiryItemFormState createState() => _ExpiryItemFormState();
 }
@@ -29,6 +30,7 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
 
   @override
   void initState() {
+    _expiryDate = DateTime.now();
     tz.initializeTimeZones();
     var androidInitialize = AndroidInitializationSettings('ic_launcher');
     var iOSInitialize = IOSInitializationSettings();
@@ -44,13 +46,15 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
     final pickedDate = await showDatePicker(
         context: ctx,
         initialDate:
-            args['edit'] ? DateTime.parse(args['date']) : DateTime(2021),
+            args['edit'] ? DateTime.parse(args['date']) : DateTime.now(),
         firstDate: DateTime(2021),
         lastDate: DateTime(2090));
 
     if (pickedDate == null) return;
 
-    _expiryDate = pickedDate;
+    setState(() {
+      _expiryDate = pickedDate;
+    });
   }
 
   Future<void> initTimezone() async {
@@ -62,22 +66,25 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
 
   void _save() async {
     _isLoading = true;
-    final newItem =
-        ExpiryItem(id: uuid.v4(), name: _name, expiryDate: _expiryDate);
-    await Provider.of<ExpiryItems>(context, listen: false).addItem(newItem);
-    await localNotification.zonedSchedule(
-        Provider.of<ExpiryItems>(context, listen: false).size(),
-        newItem.name,
-        "$newItem is going to expire soon",
-        tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
-        const NotificationDetails(
-            android: AndroidNotificationDetails("expiry-channel-1",
-                "expiry-channel", "channel for expiry items notifications"),
-            iOS: IOSNotificationDetails()),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        androidAllowWhileIdle: true);
-    Navigator.pop(context);
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      final newItem =
+          ExpiryItem(id: uuid.v4(), name: _name, expiryDate: _expiryDate);
+      await Provider.of<ExpiryItems>(context, listen: false).addItem(newItem);
+      await localNotification.zonedSchedule(
+          Provider.of<ExpiryItems>(context, listen: false).size(),
+          newItem.name,
+          "${newItem.name} is going to expire soon",
+          tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
+          const NotificationDetails(
+              android: AndroidNotificationDetails("expiry-channel-1",
+                  "expiry-channel", "channel for expiry items notifications"),
+              iOS: IOSNotificationDetails()),
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          androidAllowWhileIdle: true);
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -114,9 +121,7 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
                 ),
                 Center(
                   child: InkWell(
-                    child: FittedBox(
-                        child:
-                            Text(DateFormat.yMMMMEEEEd().format(_expiryDate))),
+                    child: FittedBox(child: Text(_expiryDate.toString())),
                     onTap: () => _presentDatePicker(context, args),
                   ),
                 ),

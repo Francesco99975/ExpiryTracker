@@ -1,4 +1,5 @@
 import 'package:expiration_notifier/providers/expiryItems.dart';
+import 'package:expiration_notifier/screens/expiryItemForm.dart';
 import 'package:expiration_notifier/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,7 @@ class ExpirationNotifierApp extends StatelessWidget {
             primarySwatch: Colors.blue,
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
+          routes: {ExpiryItemForm.ROUTE_NAME: (_) => ExpiryItemForm()},
           home: Home()),
     );
   }
