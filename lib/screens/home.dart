@@ -21,11 +21,20 @@ class _HomeState extends State<Home> {
                 )
               : Scaffold(
                   appBar: AppBar(
-                    title: FittedBox(child: Text('Expiry List')),
+                    title: FittedBox(
+                        child: Text(
+                      'Expiry List',
+                      style: TextStyle(
+                          color: Theme.of(context).accentColor,
+                          letterSpacing: 2.0),
+                    )),
                     centerTitle: true,
                     actions: [
                       IconButton(
-                          icon: Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            color: Theme.of(context).accentColor,
+                          ),
                           onPressed: () => Navigator.of(context).pushNamed(
                               ExpiryItemForm.ROUTE_NAME,
                               arguments: {'edit': false, 'name': "null"}))

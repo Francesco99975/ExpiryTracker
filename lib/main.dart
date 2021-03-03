@@ -16,7 +16,9 @@ class ExpirationNotifierApp extends StatelessWidget {
       builder: (_, __) => MaterialApp(
           title: 'Expiration Notifier',
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            brightness: Brightness.dark,
+            primarySwatch: Colors.amber,
+            accentColor: Colors.blue[600],
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
           routes: {ExpiryItemForm.ROUTE_NAME: (_) => ExpiryItemForm()},

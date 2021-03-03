@@ -5,7 +5,8 @@ import '../db/database_provider.dart';
 class ExpiryItems with ChangeNotifier {
   List<ExpiryItem> _items = [];
 
-  List<ExpiryItem> get items => _items;
+  List<ExpiryItem> get items =>
+      _items..sort((a, b) => a.expiryDate.isBefore(b.expiryDate) ? 0 : 1);
 
   Future<void> loadItems() async {
     _items = await DatabaseProvider.db.getItems();

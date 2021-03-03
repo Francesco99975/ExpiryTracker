@@ -72,7 +72,7 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
           ExpiryItem(id: uuid.v4(), name: _name, expiryDate: _expiryDate);
       await Provider.of<ExpiryItems>(context, listen: false).addItem(newItem);
       await localNotification.zonedSchedule(
-          Provider.of<ExpiryItems>(context, listen: false).size(),
+          Provider.of<ExpiryItems>(context, listen: false).size() - 1,
           newItem.name,
           "${newItem.name} is going to expire soon",
           tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
@@ -95,8 +95,17 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
 
     return Scaffold(
       appBar: AppBar(
-        title:
-            args['edit'] ? const Text("Update Item") : const Text("Add Item"),
+        title: args['edit']
+            ? Text(
+                "Update Item",
+                style: TextStyle(
+                    color: Theme.of(context).accentColor, letterSpacing: 2.0),
+              )
+            : Text(
+                "Add Item",
+                style: TextStyle(
+                    color: Theme.of(context).accentColor, letterSpacing: 2.0),
+              ),
         centerTitle: true,
       ),
       body: Container(
@@ -106,34 +115,50 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
         padding: EdgeInsets.all(5.0),
         child: Form(
           key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                TextFormField(
-                  autocorrect: false,
-                  initialValue: args['edit'] ? args['name'] : null,
-                  decoration: InputDecoration(labelText: "Item name"),
-                  validator: (value) =>
-                      value.trim().isEmpty ? "Enter a item name please" : null,
-                  onSaved: (newValue) => _name = newValue,
-                ),
-                Center(
-                  child: InkWell(
-                    child: FittedBox(child: Text(_expiryDate.toString())),
-                    onTap: () => _presentDatePicker(context, args),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    autocorrect: false,
+                    initialValue: args['edit'] ? args['name'] : null,
+                    decoration: InputDecoration(labelText: "Item name"),
+                    validator: (value) => value.trim().isEmpty
+                        ? "Enter a item name please"
+                        : null,
+                    onSaved: (newValue) => _name = newValue,
                   ),
+                  SizedBox(
+                    height: 50.0,
+                  ),
+                  Center(
+                    child: InkWell(
+                      child: FittedBox(
+                          child: Text(
+                        DateFormat.yMMMMEEEEd().format(_expiryDate),
+                        style: TextStyle(
+                            color: Theme.of(context).accentColor, fontSize: 22),
+                      )),
+                      onTap: () => _presentDatePicker(context, args),
+                    ),
+                  ),
+                ],
+              ),
+              RaisedButton(
+                color: Theme.of(context).accentColor,
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
+                onPressed: _isLoading ? () {} : _save,
+                child: Text(
+                  "SET ITEM",
+                  style: TextStyle(fontSize: 22, letterSpacing: 3.0),
                 ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                RaisedButton(
-                  onPressed: _isLoading ? () {} : _save,
-                  child: Text("Set Item"),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
