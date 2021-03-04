@@ -26,7 +26,8 @@ class Notifications with ChangeNotifier {
         notifId,
         title,
         "$title is going to expire soon",
-        tz.TZDateTime.from(expiryDate, tz.local),
+        tz.TZDateTime.from(
+            expiryDate.subtract(const Duration(days: 2)), tz.local),
         const NotificationDetails(
             android: AndroidNotificationDetails("expiry-channel-1",
                 "expiry-channel", "channel for expiry items notifications"),
