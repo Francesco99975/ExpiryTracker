@@ -1,5 +1,6 @@
 import 'package:expiration_notifier/providers/expiryItem.dart';
 import 'package:expiration_notifier/providers/expiryItems.dart';
+import 'package:expiration_notifier/providers/notifications.dart';
 import 'package:expiration_notifier/screens/expiryItemForm.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +59,10 @@ class ExpiryListItem extends StatelessWidget {
       },
       onDismissed: (direction) async {
         if (direction == DismissDirection.endToStart) {
-          Provider.of<ExpiryItems>(context, listen: false).deleteItem(item.id);
+          final index = await Provider.of<ExpiryItems>(context, listen: false)
+              .deleteItem(item.id);
+          await Provider.of<Notifications>(context, listen: false)
+              .cancelNotification(index);
         }
       },
       child: Card(

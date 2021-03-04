@@ -26,10 +26,12 @@ class ExpiryItems with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteItem(String id) async {
+  Future<int> deleteItem(String id) async {
     await DatabaseProvider.db.delete(id);
+    final index = _items.indexWhere((el) => el.id == id);
     _items.removeWhere((el) => el.id == id);
     notifyListeners();
+    return index;
   }
 
   int size() {

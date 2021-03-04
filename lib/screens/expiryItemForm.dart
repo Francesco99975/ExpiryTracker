@@ -1,8 +1,5 @@
+import 'package:expiration_notifier/providers/notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
@@ -21,9 +18,6 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
   bool _isLoading = false;
   final uuid = Uuid();
 
-  // Notification setup
-  FlutterLocalNotificationsPlugin localNotification;
-
   // Form variables
   String _name;
   DateTime _expiryDate;
@@ -31,14 +25,6 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
   @override
   void initState() {
     _expiryDate = DateTime.now();
-    tz.initializeTimeZones();
-    var androidInitialize = AndroidInitializationSettings('ic_launcher');
-    var iOSInitialize = IOSInitializationSettings();
-    var initializeSettings =
-        InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
-    localNotification = FlutterLocalNotificationsPlugin();
-    localNotification.initialize(initializeSettings);
-    initTimezone();
     super.initState();
   }
 
@@ -57,11 +43,9 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
     });
   }
 
-  Future<void> initTimezone() async {
-    return Future(() async {
-      tz.setLocalLocation(
-          tz.getLocation(await FlutterNativeTimezone.getLocalTimezone()));
-    });
+  Future<TimeOfDay> selectTime(BuildContext context) async {
+    return await showTimePicker(
+        context: context, initialTime: TimeOfDay(hour: 7, minute: 0));
   }
 
   void _save() async {
@@ -71,18 +55,13 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
       final newItem =
           ExpiryItem(id: uuid.v4(), name: _name, expiryDate: _expiryDate);
       await Provider.of<ExpiryItems>(context, listen: false).addItem(newItem);
-      await localNotification.zonedSchedule(
-          Provider.of<ExpiryItems>(context, listen: false).size() - 1,
-          newItem.name,
-          "${newItem.name} is going to expire soon",
-          tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
-          const NotificationDetails(
-              android: AndroidNotificationDetails("expiry-channel-1",
-                  "expiry-channel", "channel for expiry items notifications"),
-              iOS: IOSNotificationDetails()),
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-          androidAllowWhileIdle: true);
+      if (_expiryDate.isAfter(DateTime.now())) {
+        await Provider.of<Notifications>(context, listen: false)
+            .scheduleNotification(
+                Provider.of<ExpiryItems>(context, listen: false).size() - 1,
+                newItem.name,
+                newItem.expiryDate);
+      }
       Navigator.pop(context);
     }
   }
@@ -143,6 +122,33 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
                             color: Theme.of(context).accentColor, fontSize: 22),
                       )),
                       onTap: () => _presentDatePicker(context, args),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 50.0,
+                  ),
+                  Center(
+                    child: InkWell(
+                      child: FittedBox(
+                          child: Text(
+                        DateFormat.Hm().format(_expiryDate),
+                        style: TextStyle(
+                            color: Theme.of(context).accentColor, fontSize: 22),
+                      )),
+                      onTap: () async {
+                        TimeOfDay choice = await selectTime(context);
+                        if (choice != null) {
+                          setState(() {
+                            _expiryDate = DateTime(
+                                _expiryDate.year,
+                                _expiryDate.month,
+                                _expiryDate.day,
+                                choice.hour,
+                                choice.minute,
+                                0);
+                          });
+                        }
+                      },
                     ),
                   ),
                 ],

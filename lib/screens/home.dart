@@ -1,4 +1,5 @@
 import 'package:expiration_notifier/providers/expiryItems.dart';
+import 'package:expiration_notifier/providers/notifications.dart';
 import 'package:expiration_notifier/screens/expiryItemForm.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,11 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Provider.of<ExpiryItems>(context, listen: false).loadItems(),
+      future: Future.wait([
+        Provider.of<ExpiryItems>(context, listen: false).loadItems(),
+        Provider.of<Notifications>(context, listen: false)
+            .loadNotificationsPlugin()
+      ]),
       builder: (context, snapshot) =>
           snapshot.connectionState == ConnectionState.waiting
               ? Center(

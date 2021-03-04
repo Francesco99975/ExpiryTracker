@@ -1,4 +1,5 @@
 import 'package:expiration_notifier/providers/expiryItems.dart';
+import 'package:expiration_notifier/providers/notifications.dart';
 import 'package:expiration_notifier/screens/expiryItemForm.dart';
 import 'package:expiration_notifier/screens/home.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +12,11 @@ void main() {
 class ExpirationNotifierApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ExpiryItems(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ExpiryItems()),
+        ChangeNotifierProvider(create: (_) => Notifications())
+      ],
       builder: (_, __) => MaterialApp(
           title: 'Expiration Notifier',
           theme: ThemeData(
