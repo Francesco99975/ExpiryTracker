@@ -59,10 +59,10 @@ class ExpiryListItem extends StatelessWidget {
       },
       onDismissed: (direction) async {
         if (direction == DismissDirection.endToStart) {
-          final index = await Provider.of<ExpiryItems>(context, listen: false)
-              .deleteItem(item.id);
           await Provider.of<Notifications>(context, listen: false)
-              .cancelNotification(index);
+              .cancelNotification(item.id);
+          await Provider.of<ExpiryItems>(context, listen: false)
+              .deleteItem(item.id);
         }
       },
       child: Card(

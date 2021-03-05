@@ -13,10 +13,11 @@ class ExpiryItems with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addItem(ExpiryItem itm) async {
-    await DatabaseProvider.db.insert(itm);
-    _items.add(itm);
+  Future<int> addItem(ExpiryItem itm) async {
+    final item = await DatabaseProvider.db.insert(itm);
+    _items.add(item);
     notifyListeners();
+    return item.id;
   }
 
   Future<void> updateItem(ExpiryItem itm) async {
@@ -26,7 +27,7 @@ class ExpiryItems with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int> deleteItem(String id) async {
+  Future<int> deleteItem(int id) async {
     await DatabaseProvider.db.delete(id);
     final index = _items.indexWhere((el) => el.id == id);
     _items.removeWhere((el) => el.id == id);

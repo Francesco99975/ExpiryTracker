@@ -2,12 +2,11 @@ import 'package:flutter/foundation.dart';
 import '../db/database_provider.dart';
 
 class ExpiryItem with ChangeNotifier {
-  String id;
+  int id;
   String name;
   DateTime expiryDate;
 
-  ExpiryItem(
-      {@required this.id, @required this.name, @required this.expiryDate});
+  ExpiryItem({this.id, @required this.name, @required this.expiryDate});
 
   ExpiryItem.fromJson(Map<String, dynamic> jsonData) {
     this.id = jsonData[DatabaseProvider.COLUMN_ID];
@@ -17,10 +16,14 @@ class ExpiryItem with ChangeNotifier {
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    var map = <String, dynamic>{
       DatabaseProvider.COLUMN_ID: this.id,
       DatabaseProvider.COLUMN_NAME: this.name,
       DatabaseProvider.COLUMN_EXPIRY_DATE: this.expiryDate.toString()
     };
+
+    if (id != null) map[DatabaseProvider.COLUMN_ID] = id;
+
+    return map;
   }
 }

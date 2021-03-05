@@ -1,7 +1,6 @@
 import 'package:expiration_notifier/providers/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 import '../providers/expiryItems.dart';
 import '../providers/expiryItem.dart';
@@ -16,7 +15,6 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
   // UI state variables
   final GlobalKey<FormState> _formKey = GlobalKey();
   bool _isLoading = false;
-  final uuid = Uuid();
 
   // Form variables
   String _name;
@@ -39,7 +37,8 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
     if (pickedDate == null) return;
 
     setState(() {
-      _expiryDate = pickedDate;
+      _expiryDate = DateTime(pickedDate.year, pickedDate.month, pickedDate.day,
+          _expiryDate.hour, _expiryDate.minute, 0);
     });
   }
 
@@ -52,15 +51,12 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
     _isLoading = true;
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      final newItem =
-          ExpiryItem(id: uuid.v4(), name: _name, expiryDate: _expiryDate);
-      await Provider.of<ExpiryItems>(context, listen: false).addItem(newItem);
+      final newItem = ExpiryItem(name: _name, expiryDate: _expiryDate);
+      final int id = await Provider.of<ExpiryItems>(context, listen: false)
+          .addItem(newItem);
       if (_expiryDate.isAfter(DateTime.now())) {
         await Provider.of<Notifications>(context, listen: false)
-            .scheduleNotification(
-                Provider.of<ExpiryItems>(context, listen: false).size() - 1,
-                newItem.name,
-                newItem.expiryDate);
+            .scheduleNotification(id, newItem.name, newItem.expiryDate);
       }
       Navigator.pop(context);
     }
