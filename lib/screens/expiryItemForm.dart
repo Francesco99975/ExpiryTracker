@@ -20,36 +20,33 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
   String _name;
   DateTime _expiryDate;
 
-  @override
-  void initState() {
-    _expiryDate = DateTime.now();
-    super.initState();
-  }
-
   void _presentDatePicker(BuildContext ctx, args) async {
     final pickedDate = await showDatePicker(
         context: ctx,
-        initialDate:
-            args['edit'] ? DateTime.parse(args['date']) : DateTime.now(),
-        firstDate: DateTime(2021),
-        lastDate: DateTime(2090));
+        initialDate: args['edit']
+            ? DateTime.parse(args['date'])
+            : DateTime.now().add(const Duration(days: 2)),
+        firstDate: DateTime.now(),
+        lastDate: DateTime(2150));
 
     if (pickedDate == null) return;
 
     setState(() {
       _expiryDate = DateTime(pickedDate.year, pickedDate.month, pickedDate.day,
           _expiryDate.hour, _expiryDate.minute, 0);
+      print(_expiryDate);
     });
   }
 
-  Future<TimeOfDay> selectTime(BuildContext context) async {
+  Future<TimeOfDay> selectTime(BuildContext context, sh, sm) async {
     return await showTimePicker(
-        context: context, initialTime: TimeOfDay(hour: 7, minute: 0));
+        context: context, initialTime: TimeOfDay(hour: sh, minute: sm));
   }
 
   void _save() async {
     _isLoading = true;
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState.validate() &&
+        _expiryDate.isAfter(DateTime.now())) {
       _formKey.currentState.save();
       final newItem = ExpiryItem(name: _name, expiryDate: _expiryDate);
       final int id = await Provider.of<ExpiryItems>(context, listen: false)
@@ -58,6 +55,8 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
         await Provider.of<Notifications>(context, listen: false)
             .scheduleNotification(id, newItem.name, newItem.expiryDate);
       }
+      Navigator.pop(context);
+    } else {
       Navigator.pop(context);
     }
   }
@@ -68,6 +67,9 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
     final args =
         ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
 
+    _expiryDate = args['edit']
+        ? DateTime.parse(args['date'])
+        : DateTime.now().add(const Duration(days: 2));
     return Scaffold(
       appBar: AppBar(
         title: args['edit']
@@ -132,7 +134,8 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
                             color: Theme.of(context).accentColor, fontSize: 22),
                       )),
                       onTap: () async {
-                        TimeOfDay choice = await selectTime(context);
+                        TimeOfDay choice = await selectTime(
+                            context, _expiryDate.hour, _expiryDate.minute);
                         if (choice != null) {
                           setState(() {
                             _expiryDate = DateTime(

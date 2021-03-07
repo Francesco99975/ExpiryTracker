@@ -91,7 +91,7 @@ class ExpiryListItem extends StatelessWidget {
                   .pushNamed(ExpiryItemForm.ROUTE_NAME, arguments: {
                 'edit': true,
                 'name': item.name,
-                'date': item.expiryDate
+                'date': item.expiryDate.toString()
               }),
             )),
       ),

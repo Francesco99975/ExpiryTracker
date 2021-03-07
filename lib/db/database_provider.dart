@@ -28,7 +28,7 @@ class DatabaseProvider {
     return await openDatabase(join(dbPath, DATABASE_FILE), version: 1,
         onCreate: (db, version) async {
       await db.execute("CREATE TABLE IF NOT EXISTS $TABLE_EXPIRY("
-          "$COLUMN_ID INT PRIMARY KEY,"
+          "$COLUMN_ID INTEGER PRIMARY KEY,"
           "$COLUMN_NAME TEXT NOT NULL,"
           "$COLUMN_EXPIRY_DATE TEXT NOT NULL);");
     });

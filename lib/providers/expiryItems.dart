@@ -5,8 +5,12 @@ import '../db/database_provider.dart';
 class ExpiryItems with ChangeNotifier {
   List<ExpiryItem> _items = [];
 
-  List<ExpiryItem> get items =>
-      _items..sort((a, b) => a.expiryDate.isBefore(b.expiryDate) ? 0 : 1);
+  List<ExpiryItem> get items => _items
+    ..sort((a, b) => a.expiryDate.isBefore(b.expiryDate)
+        ? -1
+        : a.expiryDate.isAfter(b.expiryDate)
+            ? 1
+            : 0);
 
   Future<void> loadItems() async {
     _items = await DatabaseProvider.db.getItems();
@@ -27,12 +31,10 @@ class ExpiryItems with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int> deleteItem(int id) async {
+  Future<void> deleteItem(int id) async {
     await DatabaseProvider.db.delete(id);
-    final index = _items.indexWhere((el) => el.id == id);
     _items.removeWhere((el) => el.id == id);
     notifyListeners();
-    return index;
   }
 
   int size() {
