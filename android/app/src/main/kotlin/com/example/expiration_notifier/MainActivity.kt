@@ -1,4 +1,4 @@
-package com.example.expiration_notifier
+package dev.francescobarranca.expiry_tracker
 
 import io.flutter.embedding.android.FlutterActivity
 
