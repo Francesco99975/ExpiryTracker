@@ -90,6 +90,7 @@ class ExpiryListItem extends StatelessWidget {
               onPressed: () => Navigator.of(context)
                   .pushNamed(ExpiryItemForm.ROUTE_NAME, arguments: {
                 'edit': true,
+                'id': item.id,
                 'name': item.name,
                 'date': item.expiryDate.toString()
               }),

@@ -15,10 +15,28 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
   // UI state variables
   final GlobalKey<FormState> _formKey = GlobalKey();
   bool _isLoading = false;
+  bool _isInit = true;
 
   // Form variables
   String _name;
   DateTime _expiryDate;
+  Map<String, dynamic> args;
+  Size deviceSize;
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      args = ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
+      deviceSize = MediaQuery.of(context).size;
+
+      _expiryDate = args['edit']
+          ? DateTime.parse(args['date'])
+          : DateTime.now().add(const Duration(days: 2));
+
+      _isInit = false;
+    }
+    super.didChangeDependencies();
+  }
 
   void _presentDatePicker(BuildContext ctx, args) async {
     final pickedDate = await showDatePicker(
@@ -46,30 +64,50 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
   void _save() async {
     _isLoading = true;
     if (_formKey.currentState.validate() &&
-        _expiryDate.isAfter(DateTime.now())) {
+        _expiryDate.isAfter(DateTime.now().add(const Duration(days: 2)))) {
       _formKey.currentState.save();
-      final newItem = ExpiryItem(name: _name, expiryDate: _expiryDate);
-      final int id = await Provider.of<ExpiryItems>(context, listen: false)
-          .addItem(newItem);
-      if (_expiryDate.isAfter(DateTime.now())) {
-        await Provider.of<Notifications>(context, listen: false)
-            .scheduleNotification(id, newItem.name, newItem.expiryDate);
+      if (!args['edit']) {
+        final newItem = ExpiryItem(name: _name, expiryDate: _expiryDate);
+        final int id = await Provider.of<ExpiryItems>(context, listen: false)
+            .addItem(newItem);
+        if (_expiryDate.isAfter(DateTime.now())) {
+          await Provider.of<Notifications>(context, listen: false)
+              .scheduleNotification(id, newItem.name, newItem.expiryDate);
+        }
+      } else {
+        final updatedItem =
+            ExpiryItem(id: args['id'], name: _name, expiryDate: _expiryDate);
+        await Provider.of<ExpiryItems>(context, listen: false)
+            .updateItem(updatedItem);
+        if (_expiryDate.isAfter(DateTime.now())) {
+          await Provider.of<Notifications>(context, listen: false)
+              .cancelNotification(updatedItem.id);
+          await Provider.of<Notifications>(context, listen: false)
+              .scheduleNotification(
+                  updatedItem.id, updatedItem.name, updatedItem.expiryDate);
+        }
       }
       Navigator.pop(context);
     } else {
-      Navigator.pop(context);
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Invalid Data"),
+          content: const Text(
+              "Please enter valid data for the item name, and make sure that the date is set at least 2 days from now"),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text("Dismiss"),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          ],
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).size;
-    final args =
-        ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-
-    _expiryDate = args['edit']
-        ? DateTime.parse(args['date'])
-        : DateTime.now().add(const Duration(days: 2));
     return Scaffold(
       appBar: AppBar(
         title: args['edit']
@@ -159,7 +197,7 @@ class _ExpiryItemFormState extends State<ExpiryItemForm> {
                     borderRadius: BorderRadius.circular(20.0)),
                 onPressed: _isLoading ? () {} : _save,
                 child: Text(
-                  "SET ITEM",
+                  args['edit'] ? "UPDATE ITEM" : "SET ITEM",
                   style: TextStyle(fontSize: 22, letterSpacing: 3.0),
                 ),
               ),

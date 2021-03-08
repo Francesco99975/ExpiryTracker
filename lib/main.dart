@@ -18,7 +18,7 @@ class ExpirationNotifierApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => Notifications())
       ],
       builder: (_, __) => MaterialApp(
-          title: 'Expiration Notifier',
+          title: 'Expiry Tracker',
           theme: ThemeData(
             brightness: Brightness.dark,
             primarySwatch: Colors.amber,
